@@ -1,0 +1,50 @@
+<html>
+<head>
+	<title></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type ="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function (){
+            // this triggers the connection event in our server!
+            var socket = io.connect();
+            var user = prompt("Please enter your name:");
+            socket.emit('new_user', {res: user});
+            socket.on('user', function (data){
+                var id = data.user;
+                $("form input").attr("value", id);
+                $('#convos').html('');
+                for(convo in data.res){
+                    $('#convos').append('<p>'+data.res[convo]+'</p>');
+                }
+            });
+            $("form").submit(function(){
+                var message = $("form").serialize();
+                socket.emit("message", {res:message});
+                return false;
+            })
+            socket.on('convos', function (data){
+                $('#convos').html('');
+                for(convo in data.res){
+                    $('#convos').append('<p>'+data.res[convo]+'</p>');
+                }
+            });
+        })
+	</script>
+</head>
+<body>
+	<div class="container">
+        <div class="row">
+            <img style="height:65px" class="center-block" src="images/mean.png" alt="logo">
+            <h1 class="col" style="font-size: 50px;">MESSAGE BOARD CHAT</h1>
+        </div>
+        <div id="convos"></div>
+        <form action="/" method="post">
+            <input type="hidden" name="user">
+            <textarea name="message" class="form-control" placeholder="Input text here"></textarea>
+            <br>
+            <button type="submit" class="btn btn-danger">Send</button>
+        </form>
+	</div>
+</body>
+</html>
